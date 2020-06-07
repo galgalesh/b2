@@ -42,6 +42,7 @@ const uint8_t MemoryDiscImage::FILL_BYTE=0xe5;
 
 const std::string MemoryDiscImage::LOAD_METHOD_FILE="file";
 const std::string MemoryDiscImage::LOAD_METHOD_ZIP="zip";
+const std::string MemoryDiscImage::LOAD_METHOD_DEFAULT_DISK="default";
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -214,7 +215,7 @@ static bool LoadDiscImage(std::vector<uint8_t> *data,
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-std::shared_ptr<MemoryDiscImage> MemoryDiscImage::LoadFromFile(
+std::shared_ptr<MemoryDiscImage> MemoryDiscImage::LoadFromFileOrZipFile(
     std::string path,
     Messages *msg)
 {
@@ -242,6 +243,28 @@ std::shared_ptr<MemoryDiscImage> MemoryDiscImage::LoadFromFile(
     }
 
     return LoadFromBuffer(path,method,data.data(),data.size(),geometry,msg);
+}
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<MemoryDiscImage> MemoryDiscImage::LoadFromFile(std::string path,
+                                                               std::string load_method,
+                                                               Messages *msg)
+{
+    std::vector<uint8_t> data;
+    DiscGeometry geometry;
+
+    if(!LoadDiscImage(&data,&geometry,path,msg)) {
+        return nullptr;
+    }
+
+    return LoadFromBuffer(std::move(path),
+                          std::move(load_method),
+                          data.data(),
+                          data.size(),
+                          geometry,
+                          msg);
 }
 
 //////////////////////////////////////////////////////////////////////////

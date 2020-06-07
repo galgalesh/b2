@@ -25,6 +25,7 @@ class CommandKeymapsUI;
 class SettingsUI;
 class DiscImage;
 class FileMenuItem;
+struct Disc;
 
 #include "keys.h"
 #include "dear_imgui.h"
@@ -389,7 +390,8 @@ private:
     void DoFileMenu();
     void DoDiscDriveSubMenu(int drive,const std::shared_ptr<const DiscImage> &disc_image);
     void DoDiscImageSubMenu(int drive,bool boot);
-    void DoDiscImageSubMenuItem(int drive,std::shared_ptr<DiscImage> disc_image,FileMenuItem *item,bool boot);
+    void LoadDiscImage(int drive,std::shared_ptr<DiscImage> disc_image,FileMenuItem *item,bool boot);
+    void DoDefaultDiscsSubMenu(int drive,bool boot,const char *title,const Disc *discs,size_t num_discs);
     void DoEditMenu();
     void DoHardwareMenu();
     void DoKeyboardMenu();

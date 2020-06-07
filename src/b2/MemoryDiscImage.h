@@ -20,14 +20,27 @@ class MemoryDiscImage:
 public:
     static const std::string LOAD_METHOD_FILE;
     static const std::string LOAD_METHOD_ZIP;
+    static const std::string LOAD_METHOD_DEFAULT_DISK;
 
     static const uint8_t FILL_BYTE;
 
-    static std::shared_ptr<MemoryDiscImage> LoadFromBuffer(std::string path,std::string load_method,const void *data,size_t data_size,const DiscGeometry &geometry,Messages *msg);
+    static std::shared_ptr<MemoryDiscImage> LoadFromBuffer(std::string path,
+                                                           std::string load_method,
+                                                           const void *data,
+                                                           size_t data_size,
+                                                           const DiscGeometry &geometry,
+                                                           Messages *msg);
 
-    // If the load succeeds, the method will be LOAD_METHOD_FILE or
-    // LOAD_METHOD_ZIP.
-    static std::shared_ptr<MemoryDiscImage> LoadFromFile(std::string path,Messages *msg);
+    // Zip files will be detected automatically. If the load succeeds, the
+    // method will be LOAD_METHOD_FILE or LOAD_METHOD_ZIP.
+    static std::shared_ptr<MemoryDiscImage> LoadFromFileOrZipFile(std::string path,
+                                                                  Messages *msg);
+
+    // The disc image will be loaded from the file as-is. If the load succeeds,
+    // the load method will be whatever was passed in.
+    static std::shared_ptr<MemoryDiscImage> LoadFromFile(std::string path,
+                                                         std::string load_method,
+                                                         Messages *msg);
 
     ~MemoryDiscImage();
 

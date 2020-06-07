@@ -38,6 +38,7 @@
 #include "SavedStatesUI.h"
 #include "BeebLinkUI.h"
 #include "SettingsUI.h"
+#include "discs.h"
 
 #ifdef _MSC_VER
 #include <crtdbg.h>
@@ -1301,9 +1302,9 @@ void BeebWindow::DoDiscImageSubMenu(int drive,bool boot) {
 
     FileMenuItem file_item(&d->open_disc_image_file_dialog,"Disc image...","Recent disc image");
     if(file_item.selected) {
-        std::shared_ptr<MemoryDiscImage> new_disc_image=MemoryDiscImage::LoadFromFile(file_item.path,
-                                                                                      &m_msg);
-        this->DoDiscImageSubMenuItem(drive,std::move(new_disc_image),&file_item,boot);
+        std::shared_ptr<MemoryDiscImage> new_disc_image=MemoryDiscImage::LoadFromFileOrZipFile(file_item.path,
+                                                                                               &m_msg);
+        this->LoadDiscImage(drive,std::move(new_disc_image),&file_item,boot);
     }
 
     FileMenuItem direct_item(&d->open_direct_disc_image_file_dialog,
@@ -1312,17 +1313,56 @@ void BeebWindow::DoDiscImageSubMenu(int drive,bool boot) {
     if(direct_item.selected) {
         std::shared_ptr<DirectDiscImage> new_disc_image=DirectDiscImage::CreateForFile(direct_item.path,
                                                                                     &m_msg);
-        this->DoDiscImageSubMenuItem(drive,std::move(new_disc_image),&direct_item,boot);
+        this->LoadDiscImage(drive,std::move(new_disc_image),&direct_item,boot);
+    }
+
+    ImGui::Separator();
+
+    if(ImGui::BeginMenu("Default disc image")) {
+        this->DoDefaultDiscsSubMenu(drive,boot,"DFS",DEFAULT_DFS_DISCS,NUM_DEFAULT_DFS_DISCS);
+        this->DoDefaultDiscsSubMenu(drive,boot,"ADFS",DEFAULT_ADFS_DISCS,NUM_DEFAULT_ADFS_DISCS);
+        ImGui::EndMenu();
     }
 }
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-void BeebWindow::DoDiscImageSubMenuItem(int drive,
-                                        std::shared_ptr<DiscImage> disc_image,
-                                        FileMenuItem *item,
-                                        bool boot)
+void BeebWindow::DoDefaultDiscsSubMenu(int drive,
+                                       bool boot,
+                                       const char *title,
+                                       const Disc *discs,
+                                       size_t num_discs) {
+    ASSERT(drive>=0&&drive<NUM_DRIVES);
+
+    if(ImGui::BeginMenu(title)) {
+        for(size_t i=0;i<num_discs;++i) {
+            const Disc *disc=&discs[i];
+
+            if(!boot||disc->bootable) {
+                if(ImGui::MenuItem(disc->name.c_str())) {
+                    std::string path=disc->GetAssetPath();
+                    std::shared_ptr<MemoryDiscImage> disc_image=MemoryDiscImage::LoadFromFile(path,
+                                                                                              MemoryDiscImage::LOAD_METHOD_DEFAULT_DISK,
+                                                                                              &m_msg);
+                    this->LoadDiscImage(drive,
+                                        std::move(disc_image),
+                                        nullptr,
+                                        boot);
+                }
+            }
+        }
+        ImGui::EndMenu();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+void BeebWindow::LoadDiscImage(int drive,
+                               std::shared_ptr<DiscImage> disc_image,
+                               FileMenuItem *item,
+                               bool boot)
 {
     if(!!disc_image) {
         m_beeb_thread->Send(std::make_shared<BeebThread::LoadDiscMessage>(drive,
@@ -1333,7 +1373,9 @@ void BeebWindow::DoDiscImageSubMenuItem(int drive,
                                                                                               BeebThreadHardResetFlag_Run));
         }
 
-        item->Success();
+        if(item) {
+            item->Success();
+        }
     }
 }
 

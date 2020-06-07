@@ -398,6 +398,7 @@ from the request content type, as follows:
 * `application/vnd.acorn.disc-image.ddd` - `.ddd` file
 * `application/vnd.acorn.disc-image.adm` - `.adm` file
 * `application/vnd.acorn.disc-image.adl` - `.adl` file
+* `application/vnd.acorn.disc-image.ads` - `.ads` file
 
 In either case, read the disc image data from the request body.
 
