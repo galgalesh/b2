@@ -6,8 +6,11 @@ A brief summary of the main features of the emulator.
 
 If the disc auto-boots, use `Run` on the `File` menu. Use the `Disc
 image...` or `Direct disc image...` option to select an disc image,
-and the emulator will auto boot it for you. This should hopefully
-correctly handle DFS and ADFS discs.
+and the emulator will try to auto boot it for you.
+
+(Note that the auto boot mechanism isn't perfect :( - if a Shift+Break
+selects the wrong filing system for the selected disk, the auto boot
+will fail to work.)
 
 To load a disc without auto-booting, go to `Drive 0` or `Drive 1` on
 the `File` menu instead.
